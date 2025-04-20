@@ -75,30 +75,60 @@ const [resetTrigger, setResetTrigger] = useState(0);
     }
   }, [fetchData]);
 
-  const fetchFilteredEvents = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (filters.cityID) params.append('cityID', filters.cityID);
-      if (filters.categoryID) params.append('categoryID', filters.categoryID);
-      
-      // Debug: Log the filters being sent
-      console.log("Filters being sent to API:", Object.fromEntries(params));
+  // Helper function in App.js
+const getDateRangeParams = (range) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   
-      const response = await fetch(`${API_BASE}/events/filtered?${params}`);
-      const data = await response.json();
-      
-      // Debug: Log the raw API response
-      console.log("Raw API response:", data);
-      
-      setEvents(data);
-      setShowFilteredResults(true);
-    } catch (error) {
-      console.error("Filter error:", error);
-    } finally {
-      setIsLoading(false);
+  switch(range) {
+    case 'today':
+      return {
+        startDate: today.toISOString(),
+        endDate: new Date(today).setHours(23, 59, 59, 999)
+      };
+    case 'week':
+      const weekEnd = new Date(today);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      return {
+        startDate: today.toISOString(),
+        endDate: weekEnd.toISOString()
+      };
+    case 'month':
+      const monthEnd = new Date(today);
+      monthEnd.setMonth(monthEnd.getMonth() + 1);
+      return {
+        startDate: today.toISOString(),
+        endDate: monthEnd.toISOString()
+      };
+    default:
+      return {};
+  }
+};
+  // Update your fetchFilteredEvents:
+const fetchFilteredEvents = useCallback(async () => {
+  setIsLoading(true);
+  try {
+    const params = new URLSearchParams();
+    
+    if (filters.cityID) params.append('cityID', filters.cityID);
+    if (filters.categoryID) params.append('categoryID', filters.categoryID);
+    
+    if (filters.dateRange && filters.dateRange !== 'all') {
+      const { startDate, endDate } = getDateRangeParams(filters.dateRange);
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
     }
-  }, [filters]);
+
+    const response = await fetch(`${API_BASE}/events/filtered?${params}`);
+    const data = await response.json();
+    setEvents(data);
+    setShowFilteredResults(true);
+  } catch (error) {
+    console.error("Filter error:", error);
+  } finally {
+    setIsLoading(false);
+  }
+}, [filters]);
 
   useEffect(() => {
     const initialize = async () => {
