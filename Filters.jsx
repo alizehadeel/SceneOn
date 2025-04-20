@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import '../styles/main.css';
 
 const Filters = ({ 
@@ -9,23 +9,32 @@ const Filters = ({
   onApplyFilters,
   onResetFilters 
 }) => {
-  const [showCustomDates, setShowCustomDates] = useState(false);
 
-  const handleDateRangeChange = (e) => {
-    onFilterChange(e);
-    setShowCustomDates(e.target.value === 'custom');
+  
+  const handleReset = (e) => {
+    e.preventDefault();
+    console.log("Reset button clicked");
+    onResetFilters();
   };
 
+  const handleChange = (e) => {
+    onFilterChange(e);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onApplyFilters(e);
+  };
   return (
     <section className="filters">
-      <form id="filter-form" onSubmit={onApplyFilters}>
+      <form id="filter-form" onSubmit={handleSubmit}>
         <div className="filter-group">
           <label htmlFor="city-filter">City</label>
           <select
             id="city-filter"
             name="cityID"
             value={filters.cityID || ''}
-            onChange={onFilterChange}
+            onChange={handleChange}
             disabled={!cities.length}
           >
             <option value="">All Cities</option>
@@ -43,7 +52,7 @@ const Filters = ({
             id="category-filter"
             name="categoryID"
             value={filters.categoryID || ''}
-            onChange={onFilterChange}
+            onChange={handleChange}
             disabled={!categories.length}
           >
             <option value="">All Categories</option>
@@ -55,55 +64,14 @@ const Filters = ({
           </select>
         </div>
 
-        <div className="filter-group">
-          <label htmlFor="date-range">Date Range</label>
-          <select
-            id="date-range"
-            name="dateRange"
-            value={filters.dateRange}
-            onChange={handleDateRangeChange}
-          >
-            <option value="all">All Dates</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="custom">Custom Range</option>
-          </select>
-        </div>
-
-        {showCustomDates && (
-          <div className="filter-group">
-            <div>
-              <label htmlFor="start-date">From</label>
-              <input
-                type="date"
-                id="start-date"
-                name="startDate"
-                value={filters.startDate || ''}
-                onChange={onFilterChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="end-date">To</label>
-              <input
-                type="date"
-                id="end-date"
-                name="endDate"
-                value={filters.endDate || ''}
-                onChange={onFilterChange}
-              />
-            </div>
-          </div>
-        )}
-
         <div className="filter-actions">
           <button type="submit" className="filter-button">
-            Search
+          Search
           </button>
           <button 
-            type="button" 
+            type="reset" 
             className="filter-button reset-button"
-            onClick={onResetFilters}
+            onClick={handleReset}
           >
             Reset
           </button>
