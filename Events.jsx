@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import EventCard from './EventCard';
 
-const Events = ({ events, filters }) => {
-  const [displayEvents, setDisplayEvents] = useState(events || []);
+const Events = ({ events = [], filters = {}, cities = [], categories = [] }) => {
+  const [displayEvents, setDisplayEvents] = useState(events);
 
   useEffect(() => {
     if (!filters || !events) {
@@ -11,37 +11,24 @@ const Events = ({ events, filters }) => {
     }
 
     const filtered = events.filter(event => {
-      if (filters.cityID && event.CityID != filters.cityID) return false;
-      if (filters.categoryID && event.CategoryID != filters.categoryID) return false;
-      
-      if (filters.dateRange && filters.dateRange !== 'all') {
-        const eventDate = new Date(event.StartTime);
-        const now = new Date();
-        
-        switch(filters.dateRange) {
-          case 'today':
-            return eventDate.toDateString() === now.toDateString();
-          case 'week':
-            const nextWeek = new Date(now);
-            nextWeek.setDate(now.getDate() + 7);
-            return eventDate >= now && eventDate <= nextWeek;
-          case 'month':
-            const nextMonth = new Date(now);
-            nextMonth.setMonth(now.getMonth() + 1);
-            return eventDate >= now && eventDate <= nextMonth;
-          case 'custom':
-            if (filters.startDate && new Date(event.StartTime) < new Date(filters.startDate)) return false;
-            if (filters.endDate && new Date(event.StartTime) > new Date(filters.endDate)) return false;
-            return true;
-          default:
-            return true;
-        }
+      // City filter
+      if (filters.cityID) {
+        const city = cities.find(c => c.CityID == filters.cityID);
+        if (!city || event.CityName !== city.CityName) return false;
       }
+
+      // Category filter
+      if (filters.categoryID) {
+        const category = categories.find(c => c.CategoryID == filters.categoryID);
+        if (!category || event.CategoryName.trim() !== category.CategoryName.trim()) return false;
+      }
+
       return true;
     });
 
+    console.log('Filtered events:', filtered); // Debug log
     setDisplayEvents(filtered);
-  }, [events, filters]);
+  }, [events, filters, cities, categories]);
 
   return (
     <section className="featured-events">
@@ -52,7 +39,7 @@ const Events = ({ events, filters }) => {
         ) : (
           displayEvents.map(event => (
             <EventCard 
-              key={event.eventID || event.EventID} 
+              key={event.EventID} 
               event={event} 
             />
           ))
