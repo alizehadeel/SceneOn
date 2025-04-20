@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import EventCard from './EventCard';
+
 const UpcomingEvents = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +33,11 @@ const UpcomingEvents = () => {
           <p>No upcoming events found</p>
         ) : (
           events.map(event => (
-            <EventCard key={event.eventID} event={event} /> ))
+            <EventCard 
+              key={`upcoming-${event.eventID || event.EventID}`} // Unique key prefix
+              event={event} 
+            />
+          ))
         )}
       </div>
     </section>
