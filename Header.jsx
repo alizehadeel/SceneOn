@@ -2,7 +2,7 @@
 import React from 'react';
 import Filters from './Filters';
 
-const Header = ({ cities, categories, filters, onFilterChange, onApplyFilters }) => {
+const Header = ({ cities, categories, filters, onFilterChange, onApplyFilters, onResetFilters }) => {
   return (
     <header className="app-header">
       <div className="header-content">
@@ -13,10 +13,10 @@ const Header = ({ cities, categories, filters, onFilterChange, onApplyFilters })
           filters={filters}
           onFilterChange={onFilterChange}
           onApplyFilters={onApplyFilters}
+          onResetFilters={onResetFilters} // Must pass this through
         />
       </div>
     </header>
   );
 };
-
 export default Header;
