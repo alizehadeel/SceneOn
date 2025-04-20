@@ -15,6 +15,7 @@ function App() {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [cities, setCities] = useState([]);
   const [categories, setCategories] = useState([]);
+const [resetTrigger, setResetTrigger] = useState(0);
   const [filters, setFilters] = useState({
     cityID: '',
     categoryID: '',
@@ -68,6 +69,7 @@ function App() {
     try {
       const data = await fetchData('upcoming');
       setUpcomingEvents(data);
+      setEvents(data); // Also set main events
     } catch (error) {
       setError(`Upcoming Events: ${error.message}`);
     }
@@ -75,43 +77,28 @@ function App() {
 
   const fetchFilteredEvents = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
-    
     try {
       const params = new URLSearchParams();
-      
-      // Only add non-empty filters
       if (filters.cityID) params.append('cityID', filters.cityID);
       if (filters.categoryID) params.append('categoryID', filters.categoryID);
       
-      // Handle date ranges
-      if (filters.dateRange !== 'all') {
-        const { startDate, endDate } = getDateRange(filters.dateRange);
-        if (startDate) params.append('startDate', startDate);
-        if (endDate) params.append('endDate', endDate);
-      }
+      // Debug: Log the filters being sent
+      console.log("Filters being sent to API:", Object.fromEntries(params));
   
       const response = await fetch(`${API_BASE}/events/filtered?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch filtered events');
-      
       const data = await response.json();
-      console.log('Filtered events data:', data); // Debugging
       
-      // Ensure data has required fields
-      if (!data || !Array.isArray(data)) {
-        throw new Error('Invalid data format received');
-      }
+      // Debug: Log the raw API response
+      console.log("Raw API response:", data);
       
       setEvents(data);
       setShowFilteredResults(true);
     } catch (error) {
-      console.error('Filter error:', error);
-      setError(`Filtering failed: ${error.message}`);
-      setEvents([]); // Clear previous results on error
+      console.error("Filter error:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [filters, API_BASE]);
+  }, [filters]);
 
   useEffect(() => {
     const initialize = async () => {
@@ -173,11 +160,10 @@ const applyFilters = (e) => {
   fetchFilteredEvents();
 };
 
- // In App.js
-const [resetTrigger, setResetTrigger] = useState(0);
-
-// Update your resetFilters function
-const resetFilters = () => {
+const resetFilters = async () => {
+  console.log("Resetting filters...");
+  
+  // Reset filter state
   setFilters({
     cityID: '',
     categoryID: '',
@@ -185,11 +171,20 @@ const resetFilters = () => {
     startDate: '',
     endDate: ''
   });
-  setFilterChanged(false);
-  setShowFilteredResults(false);
-  setResetTrigger(prev => prev + 1); // This will trigger refetch
-};
 
+  // Hide filtered results view
+  setShowFilteredResults(false);
+
+  // Reload upcoming events
+  try {
+    const data = await fetchData('upcoming');
+    setUpcomingEvents(data);
+    setEvents(data);
+    console.log("Reset completed successfully");
+  } catch (error) {
+    console.error("Reset failed:", error);
+  }
+};
   if (isLoading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -201,18 +196,18 @@ const resetFilters = () => {
         filters={filters}
         onFilterChange={handleFilterChange}
         onApplyFilters={applyFilters}
-        onResetFilters={resetFilters}
+        onResetFilters={resetFilters} // Make sure this is passed
       />
-      {!showFilteredResults ? (
-        <UpcomingEvents events={upcomingEvents} />
-      ) : (
-       
-// In your return statement
-<Events 
-  filters={showFilteredResults ? filters : null}
-  resetTrigger={resetTrigger}
-/>
-      )}
+     {!showFilteredResults ? (
+  <UpcomingEvents events={upcomingEvents} />
+) : (
+  <Events 
+    events={events}
+    filters={filters}
+    cities={cities}
+    categories={categories}
+  />
+)}
       <Categories categories={categories} />
       <Footer />
     </div>
