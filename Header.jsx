@@ -29,6 +29,13 @@ const Header = ({ cities, categories, filters, onFilterChange, onApplyFilters, o
               >
                 Sign Up
               </button>
+              {/* User Details Button */}
+              <button 
+                className="auth-button user-details" 
+                onClick={() => navigate('/Profile/1')}
+              >
+                My Profile
+              </button>
             </div>
           </nav>
         </div>
