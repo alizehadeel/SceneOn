@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import EventCard from './EventCard';
-
 const UpcomingEvents = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,7 +8,7 @@ const UpcomingEvents = () => {
   useEffect(() => {
     const fetchUpcomingEvents = async () => {
       try {
-        const response = await fetch('http://localhost:3002/events/upcoming');
+        const response = await fetch('http://localhost:3000/events/upcoming');
         const data = await response.json();
         setEvents(data);
       } catch (err) {
@@ -33,11 +32,7 @@ const UpcomingEvents = () => {
           <p>No upcoming events found</p>
         ) : (
           events.map(event => (
-            <EventCard 
-              key={`upcoming-${event.eventID || event.EventID}`} // Unique key prefix
-              event={event} 
-            />
-          ))
+            <EventCard key={event.eventID} event={event} /> ))
         )}
       </div>
     </section>
