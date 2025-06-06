@@ -564,3 +564,19 @@ footer {
   filter: grayscale(20%);
   opacity: 0.9;
 }
+
+/* User Detail Styles */
+.auth-button.user-details {
+  background-color: white;  /* Make it white */
+  color: black;             /* Black text */
+  border: 2px solid black;  /* Border color */
+  padding: 10px 20px;       /* Add padding */
+  font-size: 16px;          /* Font size */
+  cursor: pointer;         /* Pointer cursor on hover */
+  transition: background-color 0.3s ease; /* Smooth transition on hover */
+}
+
+.auth-button.user-details:hover {
+  background-color: #f0f0f0;  /* Light gray background on hover */
+  color: black;               /* Ensure text stays black */
+}
